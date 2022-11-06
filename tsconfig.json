@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "es2017",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@config": ["src/configs/env.config"],
+      "@core": ["src/core/index"],
+      "@guards": ["src/core/guards/index"],
+      "@entities": ["src/core/database/entities/index"],
+      "@repositories": ["src/core/database/repositories/index"],
+      "@utils": ["src/utils/index"],
+      "@dtos": ["src/dtos/index"],
+      "@interfaces": ["src/interfaces/index"],
+      "@enums": ["src/enums/index"],
+      "@constants": ["src/constants/index"],
+      "@modules": ["src/components/module.index"],
+      "@controllers": ["src/components/controller.index"],
+      "@providers": ["src/components/service.index"]
+    }
+  }
+}
