@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:15
+    container_name: postgres_container
+    ports:
+      - '5777:5432'
+    environment:
+      POSTGRES_USER: garden
+      POSTGRES_PASSWORD: 123postgres
+      POSTGRES_DB: garden-dev
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - my_network
+
+networks:
+  my_network:
+
+volumes:
+  db_data:

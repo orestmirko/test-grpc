@@ -1,1 +1,1 @@
-export * from './ticket-tier/ticket-tier.controller';
+export * from './user/user.controller';

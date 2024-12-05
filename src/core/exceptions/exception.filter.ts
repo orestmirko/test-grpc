@@ -12,17 +12,24 @@ import {
 @Catch()
 export class ExceptionsFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost): void {
-    Logger.error(JSON.stringify(exception), '', 'EXCEPTION_FILTER');
-
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
     const request = ctx.getRequest();
     const status = this.getStatus(exception);
     const message = this.getMessage(exception);
 
+    Logger.error(
+      JSON.stringify({
+        message: this.getMessage(exception),
+        path: request.url,
+      }),
+      '',
+      'EXCEPTION_FILTER',
+    );
+
     response.status(status).send({
       statusCode: status,
-      message,
+      message: Array.isArray(message) ? message : [message],
       timestamp: new Date().toUTCString(),
       path: request.url,
     });
@@ -34,7 +41,16 @@ export class ExceptionsFilter implements ExceptionFilter {
       : HttpStatus.INTERNAL_SERVER_ERROR;
   }
 
-  private getMessage(exception): string {
-    return exception.message || '';
+  private getMessage(exception: any): string | string[] {
+    if (exception instanceof HttpException) {
+      const response = exception.getResponse();
+      
+      if (typeof response === 'object' && 'message' in response) {
+        const { message } = response as { message: string | string[] };
+        return message;
+      }
+      return exception.message;
+    }
+    return 'Internal server error';
   }
 }

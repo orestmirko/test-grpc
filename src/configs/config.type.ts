@@ -17,4 +17,15 @@ export type CONFIG_TYPES = {
     MIGRATIONS: string[];
     MIGRATIONS_DIR: string;
   };
+  JWT: {
+    ACCESS_SECRET: string;
+    REFRESH_SECRET: string;
+    ACCESS_EXPIRATION: string;
+    REFRESH_EXPIRATION: string;
+  };
+  REDIS: {
+    HOST: string;
+    PORT: number;
+    TTL: number;
+  };
 };

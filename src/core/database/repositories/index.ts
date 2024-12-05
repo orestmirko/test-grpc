@@ -1,1 +1,1 @@
-export * from './ticket-tier.repository';
+export * from './user.repository';
