@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService as NestJwtService } from '@nestjs/jwt';
 import CONFIG from '@config';
 import { UserEntity } from '@entities';
+import { JwtException } from 'src/core/exceptions/jwt.exception';
 
 @Injectable()
 export class CustomJwtService {
@@ -34,8 +35,12 @@ export class CustomJwtService {
   }
 
   async verifyRefreshToken(token: string) {
-    return this.nestJwtService.verifyAsync(token, {
-      secret: CONFIG.JWT.REFRESH_SECRET,
-    });
+    try {
+      return await this.nestJwtService.verifyAsync(token, {
+        secret: CONFIG.JWT.REFRESH_SECRET,
+      });
+    } catch (error) {
+      throw new JwtException('Invalid refresh token');
+    }
   }
 }

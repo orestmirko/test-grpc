@@ -48,7 +48,20 @@ export class UserService {
   public async logout(userId: number): Promise<void> {
     try {
       const sessionKey = this.getSessionKey(userId);
+      const exists = await this.redisService.exists(sessionKey);
+      
+      if (!exists) {
+        this.logger.warn(`No active session found for user ${userId}`);
+        return;
+      }
+      
       await this.redisService.del(sessionKey);
+      
+      const sessionExists = await this.redisService.exists(sessionKey);
+      if (sessionExists) {
+        throw new Error(`Failed to delete session for user ${userId}`);
+      }
+      
       this.logger.log(`User with ID ${userId} logged out successfully`);
     } catch (error) {
       this.logger.error(`Failed to logout user ${userId}: ${error.message}`);
@@ -56,8 +69,11 @@ export class UserService {
     }
   }
 
-  public async refreshTokens(userId: number, refreshToken: string): Promise<TokensDto> {
+  public async refreshTokens(refreshToken: string): Promise<TokensDto> {
     try {
+      const payload = await this.jwtService.verifyRefreshToken(refreshToken);
+      const userId = payload.sub;
+      
       const isValidSession = await this.validateSession(userId, refreshToken);
       
       if (!isValidSession) {
@@ -71,13 +87,15 @@ export class UserService {
         throw new UnauthorizedException('User not found');
       }
 
+      await this.logout(userId);
+
       const tokens = await this.jwtService.generateTokens(user);
       await this.saveSession(userId, tokens);
       
       this.logger.log(`Tokens successfully refreshed for user ${userId}`);
       return tokens;
     } catch (error) {
-      this.logger.error(`Failed to refresh tokens for user ${userId}: ${error.message}`);
+      this.logger.error(`Failed to refresh tokens: ${error.message}`);
       throw error;
     }
   }

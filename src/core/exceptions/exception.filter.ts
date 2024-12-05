@@ -20,7 +20,7 @@ export class ExceptionsFilter implements ExceptionFilter {
 
     Logger.error(
       JSON.stringify({
-        message: this.getMessage(exception),
+        message: message,
         path: request.url,
       }),
       '',
@@ -36,19 +36,22 @@ export class ExceptionsFilter implements ExceptionFilter {
   }
 
   private getStatus(exception: unknown): number {
-    return exception instanceof HttpException
-      ? exception.getStatus()
-      : HttpStatus.INTERNAL_SERVER_ERROR;
+    if (exception instanceof HttpException) {
+      return exception.getStatus();
+    }
+    return HttpStatus.INTERNAL_SERVER_ERROR;
   }
 
   private getMessage(exception: any): string | string[] {
     if (exception instanceof HttpException) {
       const response = exception.getResponse();
-      
       if (typeof response === 'object' && 'message' in response) {
         const { message } = response as { message: string | string[] };
         return message;
       }
+      return exception.message;
+    }
+    if (exception instanceof Error) {
       return exception.message;
     }
     return 'Internal server error';

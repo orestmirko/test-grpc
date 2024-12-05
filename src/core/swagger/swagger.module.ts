@@ -6,7 +6,8 @@ export const SwaggerInit = (app: NestFastifyApplication) => {
     .setTitle('Garden API')
     .setDescription('Garden API.')
     .setVersion('1.0')
-    .addTag('Ticket-tier')
+    .addBearerAuth()
+    .addTag('Garden API')
     .addServer('http://localhost:8000', 'Local server')
     .build();
 
