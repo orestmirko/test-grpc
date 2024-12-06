@@ -14,25 +14,25 @@ Go to root folder of the app.
 1. Install all required packages
 
 ```
-yarn
+npm install
 ```
 
 2. Build app:
 
 ```
-yarn build
+npm run build
 ```
 
 3. Run database migrations:
 
 ```
-yarn migration:run
+npm run migration:run
 ```
 
 4. Start nodejs app in dev mode:
 
 ```
-yarn start:dev
+npm run start:dev
 ```
 
 ## Usage
@@ -49,5 +49,5 @@ After this, you can test APIs in Swagger. 2. However you can use other tools for
 ## Create migration
 
 ```
-yarn migration:gen -n <migration-name>
+npm run migration:gen -- -n <migration-name>
 ```

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService as NestJwtService } from '@nestjs/jwt';
 import CONFIG from '@config';
 import { UserEntity } from '@entities';
-import { JwtException } from 'src/core/exceptions/jwt.exception';
+import { JwtException } from '@exceptions';
 
 @Injectable()
 export class CustomJwtService {

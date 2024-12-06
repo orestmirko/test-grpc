@@ -20,6 +20,7 @@
     "paths": {
       "@config": ["src/configs/env.config"],
       "@core": ["src/core/index"],
+      "@exceptions": ["src/core/exceptions/index"],
       "@guards": ["src/core/guards/index"],
       "@entities": ["src/core/database/entities/index"],
       "@repositories": ["src/core/database/repositories/index"],
