@@ -1,4 +1,4 @@
-import { RefreshTokenDto, SignUpDto, TokensDto } from '@dtos';
+import { RefreshTokenDto, SignUpDto, TokensDto, VerifySignUpDto } from '@dtos';
 import { Body, Controller, Post, UseGuards, Request } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { UserService } from '@providers';
@@ -10,14 +10,24 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('sign-up')
-  @ApiOperation({ summary: 'Sign up a new user' })
+  @ApiOperation({ summary: 'Initiate sign up process' })
+  @ApiResponse({
+    status: 201,
+    description: 'Verification code sent',
+  })
+  public signUp(@Body() signUpDto: SignUpDto): Promise<void> {
+    return this.userService.signUp(signUpDto);
+  }
+
+  @Post('verify')
+  @ApiOperation({ summary: 'Verify phone and complete registration' })
   @ApiResponse({
     status: 201,
     description: 'User successfully created',
     type: TokensDto,
   })
-  public signUp(@Body() signUpDto: SignUpDto): Promise<TokensDto> {
-    return this.userService.signUp(signUpDto);
+  public verifyAndCompleteSignUp(@Body() verifySignUpDto: VerifySignUpDto): Promise<TokensDto> {
+    return this.userService.verifyAndCompleteSignUp(verifySignUpDto.phone, verifySignUpDto.code);
   }
 
   @Post('logout')
@@ -42,4 +52,4 @@ export class UserController {
   public async refresh(@Body() refreshTokenDto: RefreshTokenDto): Promise<TokensDto> {
     return this.userService.refreshTokens(refreshTokenDto.refreshToken);
   }
-} 
+}

@@ -28,4 +28,9 @@ export type CONFIG_TYPES = {
     PORT: number;
     TTL: number;
   };
+  SENDPULSE: {
+    USER_ID: string;
+    SECRET: string;
+    SENDER_NAME: string;
+  };
 };

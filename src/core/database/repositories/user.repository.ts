@@ -7,4 +7,4 @@ export class UserRepository extends Repository<UserEntity> {
   constructor(private dataSource: DataSource) {
     super(UserEntity, dataSource.createEntityManager());
   }
-} 
+}

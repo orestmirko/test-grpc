@@ -35,6 +35,11 @@ export const config: CONFIG_TYPES = {
     PORT: parseInt(process.env.REDIS_PORT || '6379', 10),
     TTL: parseInt(process.env.REDIS_TTL || '86400', 10),
   },
+  SENDPULSE: {
+    USER_ID: process.env.SENDPULSE_USER_ID,
+    SECRET: process.env.SENDPULSE_SECRET,
+    SENDER_NAME: process.env.SENDPULSE_SENDER_NAME,
+  },
 };
 
 export default config;

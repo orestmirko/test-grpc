@@ -5,11 +5,6 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { CronTaskModule } from './cron';
 
 @Module({
-  imports: [
-    DatabaseModule,
-    UserModule,
-    CronTaskModule,
-    ScheduleModule.forRoot(),
-  ],
+  imports: [DatabaseModule, UserModule, CronTaskModule, ScheduleModule.forRoot()],
 })
 export class AppModule {}
