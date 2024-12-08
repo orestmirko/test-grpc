@@ -141,6 +141,39 @@ export class UserService {
     }
   }
 
+  public async login(phone: string, code: string): Promise<TokensDto> {
+    try {
+      const verificationKey = `verification_code:${phone}`;
+      const storedCode = await this.redisService.get(verificationKey);
+
+      if (!storedCode || storedCode !== code) {
+        throw new UnauthorizedException('Invalid verification code');
+      }
+
+      const user = await this.usersRepository.findOne({
+        where: { phone },
+      });
+
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+
+      const tokens = await this.jwtService.generateTokens(user);
+      await this.saveSession(user.id, tokens);
+      await this.redisService.del(verificationKey);
+
+      this.logger.log(`User ${user.id} successfully logged in`);
+      return tokens;
+    } catch (error) {
+      this.logger.error(`Login failed: ${error.message}`);
+      throw error;
+    }
+  }
+
+  public async sendVerificationCode(phone: string): Promise<void> {
+    await this.smsService.sendVerificationCode(phone);
+  }
+
   private getSessionKey(userId: number): string {
     return `user_session:${userId}`;
   }

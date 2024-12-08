@@ -1,4 +1,4 @@
-import { RefreshTokenDto, SignUpDto, TokensDto, VerifySignUpDto } from '@dtos';
+import { LoginDto, RefreshTokenDto, SignUpDto, TokensDto, VerifySignUpDto } from '@dtos';
 import { Body, Controller, Post, UseGuards, Request } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { UserService } from '@providers';
@@ -10,7 +10,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('sign-up')
-  @ApiOperation({ summary: 'Initiate sign up process' })
+  @ApiOperation({ summary: 'Initiate sign up process (SignUp step 1)' })
   @ApiResponse({
     status: 201,
     description: 'Verification code sent',
@@ -20,7 +20,7 @@ export class UserController {
   }
 
   @Post('verify')
-  @ApiOperation({ summary: 'Verify phone and complete registration' })
+  @ApiOperation({ summary: 'Verify phone and complete registration (SignUp step 2)' })
   @ApiResponse({
     status: 201,
     description: 'User successfully created',
@@ -51,5 +51,26 @@ export class UserController {
   })
   public async refresh(@Body() refreshTokenDto: RefreshTokenDto): Promise<TokensDto> {
     return this.userService.refreshTokens(refreshTokenDto.refreshToken);
+  }
+
+  @Post('send-code')
+  @ApiOperation({ summary: 'Send verification code (Login step 1)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Verification code sent',
+  })
+  public async sendVerificationCode(@Body('phone') phone: string): Promise<void> {
+    await this.userService.sendVerificationCode(phone);
+  }
+
+  @Post('login')
+  @ApiOperation({ summary: 'Login user (Login step 2)' })
+  @ApiResponse({
+    status: 200,
+    description: 'User successfully logged in',
+    type: TokensDto,
+  })
+  public async login(@Body() loginDto: LoginDto): Promise<TokensDto> {
+    return this.userService.login(loginDto.phone, loginDto.code);
   }
 }
