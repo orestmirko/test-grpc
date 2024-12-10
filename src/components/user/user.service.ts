@@ -38,7 +38,7 @@ export class UserService {
       await this.redisService.set(tempUserKey, JSON.stringify(body), 600);
 
       // Відправляємо код верифікації
-      await this.smsService.sendVerificationCode(body.phone);
+      // await this.smsService.sendVerificationCode(body.phone);
 
       this.logger.log(`Verification code sent to phone: ${body.phone}`);
     } catch (error) {

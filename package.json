@@ -110,6 +110,9 @@
       "@guards": [
         "core/guards/index"
       ],
+      "@decorators": [
+        "core/decorators/index"
+      ],
       "@entities": [
         "core/database/entities/index"
       ],

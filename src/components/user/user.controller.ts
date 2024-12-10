@@ -1,8 +1,9 @@
-import { LoginDto, RefreshTokenDto, SignUpDto, TokensDto, VerifySignUpDto } from '@dtos';
+import { LoginDto, RefreshTokenDto, SendVerificationCodeDto, SignUpDto, TokensDto, VerifySignUpDto } from '@dtos';
 import { Body, Controller, Post, UseGuards, Request } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { UserService } from '@providers';
 import { JwtAuthGuard } from '@guards';
+import { Throttle } from '@decorators';
 
 @ApiTags('Users')
 @Controller('users')
@@ -10,10 +11,15 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('sign-up')
+  @Throttle(2, 60)
   @ApiOperation({ summary: 'Initiate sign up process (SignUp step 1)' })
   @ApiResponse({
     status: 201,
     description: 'Verification code sent',
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'Too Many Requests',
   })
   public signUp(@Body() signUpDto: SignUpDto): Promise<void> {
     return this.userService.signUp(signUpDto);
@@ -59,8 +65,8 @@ export class UserController {
     status: 200,
     description: 'Verification code sent',
   })
-  public async sendVerificationCode(@Body('phone') phone: string): Promise<void> {
-    await this.userService.sendVerificationCode(phone);
+  public async sendVerificationCode(@Body() sendVerificationCodeDto: SendVerificationCodeDto): Promise<void> {
+    await this.userService.sendVerificationCode(sendVerificationCodeDto.phone);
   }
 
   @Post('login')
