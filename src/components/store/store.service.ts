@@ -74,7 +74,7 @@ export class StoreService {
   public async updateStore({
     adminId,
     storeId,
-    updateData
+    updateData,
   }: IUpdateStoreParams): Promise<StoreEntity> {
     try {
       const admin = await this.adminRepository.findOne({
