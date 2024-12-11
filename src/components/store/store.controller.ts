@@ -1,6 +1,15 @@
-import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Request,
+  Patch,
+  Param,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { CreateStoreDto } from '@dtos';
+import { CreateStoreDto, UpdateStoreDto } from '@dtos';
 import { AuthGuard, Roles } from '@guards';
 import { UserRole } from '@enums';
 import { StoreEntity } from '@entities';
@@ -25,5 +34,27 @@ export class StoreController {
     @Body() createStoreDto: CreateStoreDto,
   ): Promise<StoreEntity> {
     return this.storeService.createStore(req.user.sub, createStoreDto);
+  }
+
+  @Patch(':id')
+  @UseGuards(AuthGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update store (Admin only)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Store successfully updated',
+    type: StoreEntity,
+  })
+  public async updateStore(
+    @Request() req,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateStoreDto: UpdateStoreDto,
+  ): Promise<StoreEntity> {
+    return this.storeService.updateStore({
+      adminId: req.user.sub,
+      storeId: id,
+      updateData: updateStoreDto,
+    });
   }
 }

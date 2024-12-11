@@ -23,10 +23,6 @@ export class ChangePasswordDto {
       minUppercase: 1,
       minNumbers: 1,
       minSymbols: 1,
-
-
-
-      
     },
     {
       message:

@@ -1,1 +1,1 @@
-export * from './ticket-tier.interface';
+export * from './store';
