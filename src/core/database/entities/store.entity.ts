@@ -1,6 +1,7 @@
 import { Column, Entity, OneToMany, Index } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { StoreWorkHoursEntity } from './store-work-hours.entity';
+import { StoreType } from '@enums';
 
 @Entity('stores')
 export class StoreEntity extends BaseEntity {
@@ -19,6 +20,20 @@ export class StoreEntity extends BaseEntity {
     nullable: true,
   })
   public logoUrl: string;
+
+  @Column({
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
+  public mainImageUrl: string;
+
+  @Column({
+    type: 'enum',
+    enum: StoreType,
+    nullable: true,
+  })
+  public storeType: StoreType;
 
   @Column({
     name: 'description',
@@ -99,6 +114,13 @@ export class StoreEntity extends BaseEntity {
   })
   @Index()
   public isCityDeliveryAvailable: boolean;
+
+  @Column({
+    type: 'boolean',
+    default: false,
+  })
+  @Index()
+  public isActive: boolean;
 
   @Column({
     type: 'varchar',
