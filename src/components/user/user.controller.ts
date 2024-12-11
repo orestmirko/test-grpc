@@ -1,4 +1,11 @@
-import { LoginDto, RefreshTokenDto, SendVerificationCodeDto, SignUpDto, TokensDto, VerifySignUpDto } from '@dtos';
+import {
+  LoginDto,
+  RefreshTokenDto,
+  SendVerificationCodeDto,
+  SignUpDto,
+  TokensDto,
+  VerifySignUpDto,
+} from '@dtos';
 import { Body, Controller, Post, UseGuards, Request } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { UserService } from '@providers';
@@ -65,7 +72,9 @@ export class UserController {
     status: 200,
     description: 'Verification code sent',
   })
-  public async sendVerificationCode(@Body() sendVerificationCodeDto: SendVerificationCodeDto): Promise<void> {
+  public async sendVerificationCode(
+    @Body() sendVerificationCodeDto: SendVerificationCodeDto,
+  ): Promise<void> {
     await this.userService.sendVerificationCode(sendVerificationCodeDto.phone);
   }
 

@@ -1,18 +1,27 @@
-import { ExecutionContext, HttpException, HttpStatus, applyDecorators, UseInterceptors } from '@nestjs/common';
+import {
+  ExecutionContext,
+  HttpException,
+  HttpStatus,
+  applyDecorators,
+  UseInterceptors,
+} from '@nestjs/common';
 import { CallHandler, NestInterceptor } from '@nestjs/common';
 import { RedisService } from 'src/core/cache/redis.service';
 import { Observable } from 'rxjs';
 
 class ThrottleInterceptor implements NestInterceptor {
-  constructor(private limit: number, private ttl: number) {}
-  
+  constructor(
+    private limit: number,
+    private ttl: number,
+  ) {}
+
   async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
     const request = context.switchToHttp().getRequest();
     const ip = request.headers['x-forwarded-for'] || request.ip || request.socket.remoteAddress;
-    
+
     const redisService = new RedisService();
     const key = `throttle:${ip}:${context.getHandler().name}`;
-    
+
     const current = await redisService.get(key);
     const attempts = current ? parseInt(current) : 0;
 
@@ -26,7 +35,5 @@ class ThrottleInterceptor implements NestInterceptor {
 }
 
 export function Throttle(limit: number, ttl: number) {
-  return applyDecorators(
-    UseInterceptors(new ThrottleInterceptor(limit, ttl))
-  );
+  return applyDecorators(UseInterceptors(new ThrottleInterceptor(limit, ttl)));
 }
