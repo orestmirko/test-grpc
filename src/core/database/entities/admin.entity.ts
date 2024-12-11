@@ -1,5 +1,6 @@
-import { BaseEntity, StoreEntity } from '@entities';
 import { Column, Entity, OneToOne, JoinColumn } from 'typeorm';
+import { StoreEntity } from './store.entity';
+import { BaseEntity } from './base.entity';
 
 @Entity('admins')
 export class AdminEntity extends BaseEntity {

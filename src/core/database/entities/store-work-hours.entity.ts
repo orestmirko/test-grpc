@@ -1,5 +1,5 @@
-import { StoreEntity } from '@entities';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, BaseEntity, JoinColumn } from 'typeorm';
+import { StoreEntity } from './store.entity';
 
 @Entity('store_work_hours')
 export class StoreWorkHoursEntity extends BaseEntity {
