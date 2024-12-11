@@ -32,5 +32,6 @@ export type CONFIG_TYPES = {
     USER_ID: string;
     SECRET: string;
     SENDER_NAME: string;
+    SENDER_EMAIL: string;
   };
 };

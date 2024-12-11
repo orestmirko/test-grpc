@@ -1,15 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService as NestJwtService } from '@nestjs/jwt';
 import CONFIG from '@config';
-import { UserEntity } from '@entities';
+import { UserEntity, AdminEntity } from '@entities';
 import { JwtException } from '@exceptions';
 
 @Injectable()
 export class CustomJwtService {
   constructor(private readonly nestJwtService: NestJwtService) {}
 
-  async generateTokens(user: UserEntity) {
-    const payload = { sub: user.id, phone: user.phone };
+  async generateTokens(user: UserEntity | AdminEntity) {
+    const isAdmin = user instanceof AdminEntity;
+    const payload = {
+      sub: user.id,
+      role: isAdmin ? 'admin' : 'user',
+      ...(isAdmin ? { email: (user as AdminEntity).email } : { phone: (user as UserEntity).phone }),
+    };
 
     const [accessToken, refreshToken] = await Promise.all([
       this.nestJwtService.signAsync(payload, {
@@ -22,10 +27,7 @@ export class CustomJwtService {
       }),
     ]);
 
-    return {
-      accessToken,
-      refreshToken,
-    };
+    return { accessToken, refreshToken };
   }
 
   async verifyAccessToken(token: string) {

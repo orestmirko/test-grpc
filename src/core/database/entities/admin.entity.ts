@@ -24,4 +24,4 @@ export class AdminEntity extends BaseEntity {
   @OneToOne(() => StoreEntity)
   @JoinColumn({ name: 'store_id' })
   public store: StoreEntity;
-} 
+}

@@ -9,8 +9,8 @@ import {
 import { Body, Controller, Post, UseGuards, Request } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { UserService } from '@providers';
-import { JwtAuthGuard } from '@guards';
 import { Throttle } from '@decorators';
+import { AuthGuard, Roles } from '@guards';
 
 @ApiTags('Users')
 @Controller('users')
@@ -44,7 +44,8 @@ export class UserController {
   }
 
   @Post('logout')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard)
+  @Roles('user')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Logout user' })
   @ApiResponse({

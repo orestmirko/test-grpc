@@ -33,11 +33,9 @@ export class UserService {
         throw new ConflictException(`User with phone: ${body.phone} already exists`);
       }
 
-      // Зберігаємо дані користувача тимчасово в Redis
       const tempUserKey = `temp_user:${body.phone}`;
       await this.redisService.set(tempUserKey, JSON.stringify(body), 600);
 
-      // Відправляємо код верифікації
       // await this.smsService.sendVerificationCode(body.phone);
 
       this.logger.log(`Verification code sent to phone: ${body.phone}`);

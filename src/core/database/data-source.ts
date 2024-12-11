@@ -11,4 +11,4 @@ export const AppDataSource = new DataSource({
   migrationsRun: MIGRATIONS_RUN,
   migrations: [`${process.cwd()}/${MIGRATIONS_DIR}/*.{ts,js}`],
   entities: [`${__dirname}/../**/*.entity{.ts,.js}`],
-}); 
+});

@@ -39,6 +39,7 @@ export const config: CONFIG_TYPES = {
     USER_ID: process.env.SENDPULSE_USER_ID,
     SECRET: process.env.SENDPULSE_SECRET,
     SENDER_NAME: process.env.SENDPULSE_SENDER_NAME,
+    SENDER_EMAIL: process.env.SENDPULSE_SENDER_EMAIL,
   },
 };
 
