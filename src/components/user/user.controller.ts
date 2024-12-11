@@ -11,6 +11,7 @@ import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagg
 import { UserService } from '@providers';
 import { Throttle } from '@decorators';
 import { AuthGuard, Roles } from '@guards';
+import { UserRole } from '@enums';
 
 @ApiTags('Users')
 @Controller('users')
@@ -45,7 +46,7 @@ export class UserController {
 
   @Post('logout')
   @UseGuards(AuthGuard)
-  @Roles('user')
+  @Roles(UserRole.USER)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Logout user' })
   @ApiResponse({

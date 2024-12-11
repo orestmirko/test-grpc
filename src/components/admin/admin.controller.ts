@@ -3,6 +3,7 @@ import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagg
 import { AdminService } from './admin.service';
 import { AdminLoginDto, ChangePasswordDto, AdminInviteDto, TokensDto } from '@dtos';
 import { AuthGuard, Roles } from '@guards';
+import { UserRole } from '@enums';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -32,7 +33,7 @@ export class AdminController {
 
   @Post('change-password')
   @UseGuards(AuthGuard)
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Change admin password (Admin step 2)' })
   @ApiResponse({
@@ -45,7 +46,7 @@ export class AdminController {
 
   @Post('logout')
   @UseGuards(AuthGuard)
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Logout admin' })
   @ApiResponse({

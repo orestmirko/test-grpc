@@ -1,1 +1,1 @@
-export * from './ticket-tier-status.enum';
+export * from './user-role.enum';
