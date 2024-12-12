@@ -6,13 +6,26 @@ export class StoreWorkHoursEntity extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   public id: string;
 
-  @Column({ type: 'int', nullable: false })
+  @Column({
+    name: 'day_of_week',
+    type: 'int',
+    nullable: false,
+    default: 0,
+  })
   public dayOfWeek: number;
 
-  @Column({ type: 'time', nullable: false })
+  @Column({
+    name: 'open_time',
+    type: 'time',
+    nullable: false,
+  })
   public openTime: string;
 
-  @Column({ type: 'time', nullable: false })
+  @Column({
+    name: 'close_time',
+    type: 'time',
+    nullable: false,
+  })
   public closeTime: string;
 
   @ManyToOne(() => StoreEntity, (store) => store.workHours, { onDelete: 'CASCADE' })

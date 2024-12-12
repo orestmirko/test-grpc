@@ -4,12 +4,13 @@ import {
   ConflictException,
   NotFoundException,
   UnauthorizedException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Not } from 'typeorm';
-import { StoreEntity, AdminEntity } from '@entities';
-import { CreateStoreDto, UpdateStoreDto } from '@dtos';
-import { IUpdateStoreParams } from '@interfaces';
+import { StoreEntity, AdminEntity, StoreWorkHoursEntity } from '@entities';
+import { CreateStoreDto } from '@dtos';
+import { ISetWorkHoursParams, IUpdateStoreParams } from '@interfaces';
 
 @Injectable()
 export class StoreService {
@@ -20,6 +21,8 @@ export class StoreService {
     private readonly storeRepository: Repository<StoreEntity>,
     @InjectRepository(AdminEntity)
     private readonly adminRepository: Repository<AdminEntity>,
+    @InjectRepository(StoreWorkHoursEntity)
+    private readonly workHoursRepository: Repository<StoreWorkHoursEntity>,
   ) {}
 
   public async createStore(adminId: number, createStoreDto: CreateStoreDto): Promise<StoreEntity> {
@@ -120,6 +123,84 @@ export class StoreService {
     } catch (error) {
       this.logger.error(`Failed to update store: ${error.message}`);
       throw error;
+    }
+  }
+
+  public async setWorkHours({
+    adminId,
+    storeId,
+    workHours,
+  }: ISetWorkHoursParams): Promise<StoreEntity> {
+    try {
+      this.validateWorkHours(workHours);
+
+      const admin = await this.adminRepository.findOne({
+        where: { id: adminId },
+        relations: ['store'],
+      });
+
+      if (!admin) {
+        throw new NotFoundException('Admin not found');
+      }
+
+      if (!admin.store || admin.store.id !== storeId) {
+        throw new UnauthorizedException('Admin can only update their own store');
+      }
+
+      const store = await this.storeRepository.findOne({
+        where: { id: storeId },
+        relations: ['workHours'],
+      });
+
+      if (!store) {
+        throw new NotFoundException('Store not found');
+      }
+
+      return await this.workHoursRepository.manager.transaction(
+        async (transactionalEntityManager) => {
+          if (store.workHours?.length) {
+            await transactionalEntityManager.remove(store.workHours);
+          }
+
+          const workHoursEntities = workHours.map((wh) =>
+            transactionalEntityManager.create(StoreWorkHoursEntity, {
+              ...wh,
+              store,
+            }),
+          );
+
+          store.workHours = await transactionalEntityManager.save(
+            StoreWorkHoursEntity,
+            workHoursEntities,
+          );
+
+          return store;
+        },
+      );
+    } catch (error) {
+      this.logger.error(`Failed to set work hours: ${error.message}`);
+      throw error;
+    }
+  }
+
+  private validateWorkHours(
+    workHours: Array<{ dayOfWeek: number; openTime: string; closeTime: string }>,
+  ) {
+    const uniqueDays = new Set(workHours.map((wh) => wh.dayOfWeek));
+
+    if (uniqueDays.size !== workHours.length) {
+      throw new BadRequestException('Duplicate days of week are not allowed');
+    }
+
+    for (const workHour of workHours) {
+      const openTime = new Date(`1970-01-01T${workHour.openTime}`);
+      const closeTime = new Date(`1970-01-01T${workHour.closeTime}`);
+
+      if (openTime >= closeTime) {
+        throw new BadRequestException(
+          `Open time must be before close time for day ${workHour.dayOfWeek}`,
+        );
+      }
     }
   }
 }

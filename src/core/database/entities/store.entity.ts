@@ -2,6 +2,7 @@ import { Column, Entity, OneToMany, Index } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { StoreWorkHoursEntity } from './store-work-hours.entity';
 import { StoreType } from '@enums';
+import { ProductEntity } from './product.entity';
 
 @Entity('stores')
 export class StoreEntity extends BaseEntity {
@@ -136,6 +137,16 @@ export class StoreEntity extends BaseEntity {
   })
   public tiktokUrl: string;
 
+  @Column({
+    name: 'notes',
+    type: 'text',
+    nullable: true,
+  })
+  public notes: string;
+
   @OneToMany(() => StoreWorkHoursEntity, (workHours) => workHours.store, { cascade: true })
   public workHours: StoreWorkHoursEntity[];
+
+  @OneToMany(() => ProductEntity, (product) => product.store, { cascade: true })
+  public products: ProductEntity[];
 }
