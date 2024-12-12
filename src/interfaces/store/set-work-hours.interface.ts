@@ -3,7 +3,8 @@ export interface ISetWorkHoursParams {
   storeId: number;
   workHours: {
     dayOfWeek: number;
-    openTime: string;
-    closeTime: string;
+    isWorkingDay: boolean;
+    openTime?: string;
+    closeTime?: string;
   }[];
 }

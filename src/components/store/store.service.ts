@@ -184,7 +184,12 @@ export class StoreService {
   }
 
   private validateWorkHours(
-    workHours: Array<{ dayOfWeek: number; openTime: string; closeTime: string }>,
+    workHours: Array<{
+      dayOfWeek: number;
+      isWorkingDay: boolean;
+      openTime?: string;
+      closeTime?: string;
+    }>,
   ) {
     const uniqueDays = new Set(workHours.map((wh) => wh.dayOfWeek));
 
@@ -193,13 +198,27 @@ export class StoreService {
     }
 
     for (const workHour of workHours) {
-      const openTime = new Date(`1970-01-01T${workHour.openTime}`);
-      const closeTime = new Date(`1970-01-01T${workHour.closeTime}`);
+      if (workHour.isWorkingDay) {
+        if (!workHour.openTime || !workHour.closeTime) {
+          throw new BadRequestException(
+            `Opening and closing times are required for working day ${workHour.dayOfWeek}`,
+          );
+        }
 
-      if (openTime >= closeTime) {
-        throw new BadRequestException(
-          `Open time must be before close time for day ${workHour.dayOfWeek}`,
-        );
+        const openTime = new Date(`1970-01-01T${workHour.openTime}`);
+        const closeTime = new Date(`1970-01-01T${workHour.closeTime}`);
+
+        if (openTime >= closeTime) {
+          throw new BadRequestException(
+            `Opening time must be before closing time for day ${workHour.dayOfWeek}`,
+          );
+        }
+      } else {
+        if (workHour.openTime || workHour.closeTime) {
+          throw new BadRequestException(
+            `Working hours should not be set for non-working day ${workHour.dayOfWeek}`,
+          );
+        }
       }
     }
   }
