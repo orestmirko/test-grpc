@@ -1,5 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, ValidateNested, IsNumber, IsString, Min, Max, Matches, IsBoolean, IsOptional } from 'class-validator';
+import {
+  IsArray,
+  ValidateNested,
+  IsNumber,
+  IsString,
+  Min,
+  Max,
+  Matches,
+  IsBoolean,
+  IsOptional,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 class WorkHoursDto {
@@ -13,10 +23,10 @@ class WorkHoursDto {
   @IsBoolean()
   isWorkingDay: boolean;
 
-  @ApiProperty({ 
-    example: '09:00', 
+  @ApiProperty({
+    example: '09:00',
     description: 'Opening time (required for working days)',
-    required: false 
+    required: false,
   })
   @IsString()
   @Matches(/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/, {
@@ -25,10 +35,10 @@ class WorkHoursDto {
   @IsOptional()
   openTime?: string;
 
-  @ApiProperty({ 
-    example: '18:00', 
+  @ApiProperty({
+    example: '18:00',
     description: 'Closing time (required for working days)',
-    required: false 
+    required: false,
   })
   @IsString()
   @Matches(/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/, {
