@@ -175,7 +175,6 @@ export class ProductEntity extends BaseEntity {
     array: true,
     nullable: true,
   })
-
   @Index('IDX_PRODUCT_TAGS_GIN', { synchronize: false })
   public tags: string[];
 
