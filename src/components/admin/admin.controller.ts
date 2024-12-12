@@ -1,8 +1,8 @@
 import { Body, Controller, Post, UseGuards, Request } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth, ApiHeader } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 import { AdminLoginDto, ChangePasswordDto, AdminInviteDto, TokensDto } from '@dtos';
-import { AuthGuard, Roles } from '@guards';
+import { AuthGuard, Roles, SuperAdminGuard } from '@guards';
 import { UserRole } from '@enums';
 
 @ApiTags('Admin')
@@ -22,10 +22,16 @@ export class AdminController {
   }
 
   @Post('invite')
+  @UseGuards(SuperAdminGuard)
   @ApiOperation({ summary: 'Invite new admin (Admin step 1)' })
   @ApiResponse({
     status: 201,
     description: 'Invitation sent',
+  })
+  @ApiHeader({
+    name: 'x-super-admin-key',
+    description: 'Secret key for super admin access',
+    required: true,
   })
   public async invite(@Body() inviteDto: AdminInviteDto) {
     return this.adminService.invite(inviteDto);

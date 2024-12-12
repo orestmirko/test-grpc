@@ -34,4 +34,7 @@ export type CONFIG_TYPES = {
     SENDER_NAME: string;
     SENDER_EMAIL: string;
   };
+  ADMIN: {
+    SUPER_ADMIN_KEY: string;
+  };
 };

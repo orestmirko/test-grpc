@@ -41,6 +41,9 @@ export const config: CONFIG_TYPES = {
     SENDER_NAME: process.env.SENDPULSE_SENDER_NAME,
     SENDER_EMAIL: process.env.SENDPULSE_SENDER_EMAIL,
   },
+  ADMIN: {
+    SUPER_ADMIN_KEY: process.env.SUPER_ADMIN_KEY,
+  },
 };
 
 export default config;

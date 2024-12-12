@@ -63,8 +63,8 @@ export class AdminService {
         password: hashedPassword,
       });
 
-      await this.adminRepository.save(newAdmin);
       await this.sendInviteEmail(inviteDto.email, temporaryPassword);
+      await this.adminRepository.save(newAdmin);
 
       this.logger.log(`Invite sent to ${inviteDto.email}`);
     } catch (error) {

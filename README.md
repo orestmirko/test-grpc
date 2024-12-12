@@ -51,9 +51,6 @@ npm run start:dev
 http://localhost:8000/api
 ```
 
-When Swagger window is opened, change base url to `http://localhost:8000/api` and click "Explore" button.
-After this, you can test APIs in Swagger. 2. However you can use other tools for testing(for example Postman). It's up to you.
-
 ## Generate migration
 
 ```
