@@ -1,11 +1,8 @@
-import { Column, Entity, ManyToOne, Index, OneToMany } from 'typeorm';
+import { Column, Entity, ManyToOne, Index, OneToMany, JoinColumn } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { StoreEntity } from './store.entity';
-import { Currency } from 'src/enums/currency.enum';
-import { Season } from 'src/enums/seasons.enum';
-import { ProductType } from 'src/enums/product-types.enum';
+import { Currency, Season, ProductType, PackagingType } from '../../../enums';
 import { ProductCompositionEntity } from './product-composition.entity';
-import { PackagingType } from 'src/enums/packaging-type.enum';
 
 @Entity('products')
 export class ProductEntity extends BaseEntity {
@@ -172,7 +169,18 @@ export class ProductEntity extends BaseEntity {
   })
   public stockQuantity: number;
 
+  @Column({
+    name: 'tags',
+    type: 'varchar',
+    array: true,
+    nullable: true,
+  })
+
+  @Index('IDX_PRODUCT_TAGS_GIN', { synchronize: false })
+  public tags: string[];
+
   @ManyToOne(() => StoreEntity, (store) => store.products, { nullable: false, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'store_id' })
   public store: StoreEntity;
 
   @OneToMany(() => ProductCompositionEntity, (pc) => pc.parentProduct)

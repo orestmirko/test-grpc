@@ -1,8 +1,8 @@
 import { Column, Entity, OneToMany, Index } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { StoreWorkHoursEntity } from './store-work-hours.entity';
-import { StoreType } from '@enums';
 import { ProductEntity } from './product.entity';
+import { StoreType } from '../../../enums';
 
 @Entity('stores')
 export class StoreEntity extends BaseEntity {

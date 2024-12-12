@@ -23,6 +23,7 @@
     "migration:gen": "npm run typeorm migration:generate",
     "migration:run": "npm run typeorm migration:run",
     "migration:revert": "npm run typeorm migration:revert",
+    "migration:create": "typeorm-ts-node-commonjs migration:create",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "docker:down:volumes": "docker-compose down -v",
