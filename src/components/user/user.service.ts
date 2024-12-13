@@ -36,7 +36,7 @@ export class UserService {
       const tempUserKey = `temp_user:${body.phone}`;
       await this.redisService.set(tempUserKey, JSON.stringify(body), 600);
 
-      // await this.smsService.sendVerificationCode(body.phone);
+      await this.smsService.sendVerificationCode(body.phone);
 
       this.logger.log(`Verification code sent to phone: ${body.phone}`);
     } catch (error) {
@@ -119,7 +119,7 @@ export class UserService {
         throw new UnauthorizedException('Invalid refresh token');
       }
 
-      const user = await this.usersRepository.findOne(userId);
+      const user = await this.usersRepository.findOne({ where: { id: userId } });
 
       if (!user) {
         this.logger.error(`User with ID ${userId} not found during token refresh`);
@@ -127,7 +127,6 @@ export class UserService {
       }
 
       await this.logout(userId);
-
       const tokens = await this.jwtService.generateTokens(user);
       await this.saveSession(userId, tokens);
 

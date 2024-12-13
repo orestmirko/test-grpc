@@ -1,7 +1,13 @@
 import { Body, Controller, Post, UseGuards, Request } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth, ApiHeader } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
-import { AdminLoginDto, ChangePasswordDto, AdminInviteDto, TokensDto } from '@dtos';
+import {
+  AdminLoginDto,
+  ChangePasswordDto,
+  AdminInviteDto,
+  TokensDto,
+  RefreshTokenDto,
+} from '@dtos';
 import { AuthGuard, Roles, SuperAdminGuard } from '@guards';
 import { UserRole } from '@enums';
 
@@ -61,5 +67,16 @@ export class AdminController {
   })
   public async logout(@Request() req): Promise<void> {
     await this.adminService.logout(req.user.sub);
+  }
+
+  @Post('refresh')
+  @ApiOperation({ summary: 'Refresh access token' })
+  @ApiResponse({
+    status: 200,
+    description: 'Tokens successfully refreshed',
+    type: TokensDto,
+  })
+  public async refresh(@Body() refreshTokenDto: RefreshTokenDto): Promise<TokensDto> {
+    return this.adminService.refreshTokens(refreshTokenDto.refreshToken);
   }
 }

@@ -2,7 +2,7 @@ import { Injectable, Logger, UnauthorizedException, ConflictException } from '@n
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AdminEntity } from '@entities';
-import { AdminLoginDto, ChangePasswordDto, AdminInviteDto } from '@dtos';
+import { AdminLoginDto, ChangePasswordDto, AdminInviteDto, TokensDto } from '@dtos';
 import { CustomJwtService } from '../jwt/jwt.service';
 import { RedisService } from 'src/core/cache/redis.service';
 import * as crypto from 'crypto';
@@ -63,7 +63,8 @@ export class AdminService {
         password: hashedPassword,
       });
 
-      await this.sendInviteEmail(inviteDto.email, temporaryPassword);
+      // await this.sendInviteEmail(inviteDto.email, temporaryPassword);
+      console.log('invited admin', { password: temporaryPassword, email: inviteDto.email });
       await this.adminRepository.save(newAdmin);
 
       this.logger.log(`Invite sent to ${inviteDto.email}`);
@@ -107,8 +108,21 @@ export class AdminService {
   }
 
   public async logout(adminId: number): Promise<void> {
-    const sessionKey = `admin_session:${adminId}`;
-    await this.redisService.del(sessionKey);
+    try {
+      const sessionKey = `admin_session:${adminId}`;
+      const exists = await this.redisService.exists(sessionKey);
+
+      if (!exists) {
+        this.logger.warn(`No active session found for admin ${adminId}`);
+        return;
+      }
+
+      await this.redisService.del(sessionKey);
+      this.logger.log(`Admin with ID ${adminId} logged out successfully`);
+    } catch (error) {
+      this.logger.error(`Failed to logout admin ${adminId}: ${error.message}`);
+      throw error;
+    }
   }
 
   private async hashPassword(password: string): Promise<string> {
@@ -129,5 +143,41 @@ export class AdminService {
     `;
 
     await this.emailService.sendEmail(email, subject, message);
+  }
+
+  public async refreshTokens(refreshToken: string): Promise<TokensDto> {
+    try {
+      const payload = await this.jwtService.verifyRefreshToken(refreshToken);
+      const adminId = payload.sub;
+
+      const sessionKey = `admin_session:${adminId}`;
+      const storedTokens = await this.redisService.get(sessionKey);
+
+      if (!storedTokens) {
+        throw new UnauthorizedException('Session not found');
+      }
+
+      const tokens = JSON.parse(storedTokens);
+      if (tokens.refreshToken !== refreshToken) {
+        throw new UnauthorizedException('Invalid refresh token');
+      }
+
+      const admin = await this.adminRepository.findOne({ where: { id: adminId } });
+
+      if (!admin) {
+        this.logger.error(`Admin with ID ${adminId} not found during token refresh`);
+        throw new UnauthorizedException('Admin not found');
+      }
+
+      await this.logout(adminId);
+      const newTokens = await this.jwtService.generateTokens(admin);
+      await this.saveSession(adminId, newTokens);
+
+      this.logger.log(`Tokens successfully refreshed for admin ${adminId}`);
+      return newTokens;
+    } catch (error) {
+      this.logger.error(`Failed to refresh tokens: ${error.message}`);
+      throw error;
+    }
   }
 }

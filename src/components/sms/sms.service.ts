@@ -42,7 +42,8 @@ export class SmsService {
       await this.redisService.set(dailyAttemptsKey, (currentAttempts + 1).toString(), 86400);
 
       // Відправляємо SMS
-      await this.sendSMS(phone, `Your verification code is: ${code}`);
+      console.log('Sending SMS to', phone, `Your verification code is: ${code}`);
+      // await this.sendSMS(phone, `Your verification code is: ${code}`);
 
       return code;
     } catch (error) {

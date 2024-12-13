@@ -170,6 +170,13 @@ export class ProductEntity extends BaseEntity {
   public stockQuantity: number;
 
   @Column({
+    name: 'flowers_count',
+    type: 'int',
+    nullable: true,
+  })
+  public flowersCount: number;
+
+  @Column({
     name: 'tags',
     type: 'varchar',
     array: true,
