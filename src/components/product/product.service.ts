@@ -73,7 +73,7 @@ export class ProductService {
     store: StoreEntity,
   ): Promise<ProductEntity> {
     this.validatePackaging(dto);
-    
+
     if (dto.flowersCount !== undefined) {
       throw new BadRequestException('Field flowersCount is not allowed for flower');
     }
