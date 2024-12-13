@@ -73,6 +73,10 @@ export class ProductService {
     store: StoreEntity,
   ): Promise<ProductEntity> {
     this.validatePackaging(dto);
+    
+    if (dto.flowersCount !== undefined) {
+      throw new BadRequestException('Field flowersCount is not allowed for flower');
+    }
 
     const product = this.productRepository.create({
       ...dto,
@@ -160,10 +164,6 @@ export class ProductService {
     if (dto.colors) forbiddenFields.push('colors');
     if (dto.originCountry) forbiddenFields.push('originCountry');
     if (dto.fragranceIntensity) forbiddenFields.push('fragranceIntensity');
-
-    if (type === ProductType.FLOWER && dto.flowersCount) {
-      forbiddenFields.push('flowersCount');
-    }
 
     if (forbiddenFields.length > 0) {
       throw new BadRequestException(

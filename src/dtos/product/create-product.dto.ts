@@ -42,7 +42,7 @@ export class CreateProductDto {
   @IsOptional()
   imageUrl?: string;
 
-  @ApiProperty({ example: 100.50 })
+  @ApiProperty({ example: 100.5 })
   @IsNumber()
   @Min(0)
   price: number;
