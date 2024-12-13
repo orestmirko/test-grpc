@@ -50,9 +50,7 @@ export class StoreController {
     description: 'Returns store with work hours',
     type: StoreEntity,
   })
-  public async getStoreWithWorkHours(
-    @Request() req,
-  ): Promise<StoreEntity> {
+  public async getStoreWithWorkHours(@Request() req): Promise<StoreEntity> {
     return this.storeService.getStoreWithWorkHours(req.user.sub);
   }
 

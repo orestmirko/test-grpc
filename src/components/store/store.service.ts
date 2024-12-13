@@ -177,7 +177,7 @@ export class StoreService {
             workHoursEntities,
           );
 
-          store.workHours.forEach(wh => {
+          store.workHours.forEach((wh) => {
             delete wh.store;
           });
 
@@ -190,10 +190,7 @@ export class StoreService {
     }
   }
 
-  public async publishStore({
-    adminId,
-    storeId,
-  }: IPublishStoreParams): Promise<StoreEntity> {
+  public async publishStore({ adminId, storeId }: IPublishStoreParams): Promise<StoreEntity> {
     try {
       const admin = await this.adminRepository.findOne({
         where: { id: adminId },

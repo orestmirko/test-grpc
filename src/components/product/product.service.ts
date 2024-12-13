@@ -208,17 +208,21 @@ export class ProductService {
         throw new NotFoundException('Parent product not found');
       }
 
-      if (![ProductType.BOUQUET, ProductType.BASKET, ProductType.PACKAGE].includes(parentProduct.productType)) {
+      if (
+        ![ProductType.BOUQUET, ProductType.BASKET, ProductType.PACKAGE].includes(
+          parentProduct.productType,
+        )
+      ) {
         throw new BadRequestException('Can only add flowers to bouquet, basket or package');
       }
 
       const childProducts = await Promise.all(
         flowers.map(async ({ flowerId }) => {
           const product = await this.productRepository.findOne({
-            where: { 
-              id: flowerId, 
+            where: {
+              id: flowerId,
               store: { id: admin.store.id },
-              productType: ProductType.FLOWER 
+              productType: ProductType.FLOWER,
             },
           });
 
@@ -241,13 +245,11 @@ export class ProductService {
       if (!parentProduct.compositions) {
         parentProduct.compositions = [];
       }
-      
+
       parentProduct.compositions.push(...compositions);
       await this.productRepository.manager.save(compositions);
 
-      this.logger.log(
-        `Added ${flowers.length} flowers to product (ID: ${parentProductId})`,
-      );
+      this.logger.log(`Added ${flowers.length} flowers to product (ID: ${parentProductId})`);
 
       return parentProduct;
     } catch (error) {

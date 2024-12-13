@@ -43,10 +43,6 @@ export class ProductController {
     @Param('id', ParseIntPipe) id: number,
     @Body() addFlowersDto: AddFlowerToProductDto,
   ): Promise<ProductEntity> {
-    return this.productService.addFlowersToProduct(
-      req.user.sub,
-      id,
-      addFlowersDto.flowers,
-    );
+    return this.productService.addFlowersToProduct(req.user.sub, id, addFlowersDto.flowers);
   }
 }

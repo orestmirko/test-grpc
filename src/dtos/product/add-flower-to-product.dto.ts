@@ -19,11 +19,11 @@ export class AddFlowerToProductDto {
     description: 'Array of flowers with quantities to add',
     example: [
       { flowerId: 1, quantity: 5 },
-      { flowerId: 2, quantity: 3 }
-    ]
+      { flowerId: 2, quantity: 3 },
+    ],
   })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => FlowerQuantityDto)
   flowers: FlowerQuantityDto[];
-} 
+}
