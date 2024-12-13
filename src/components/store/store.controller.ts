@@ -7,6 +7,9 @@ import {
   Patch,
   Param,
   ParseIntPipe,
+  UseInterceptors,
+  ClassSerializerInterceptor,
+  Get,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { CreateStoreDto, UpdateStoreDto, SetWorkHoursDto } from '@dtos';
@@ -15,6 +18,7 @@ import { UserRole } from '@enums';
 import { StoreEntity } from '@entities';
 import { StoreService } from './store.service';
 @ApiTags('Stores')
+@UseInterceptors(ClassSerializerInterceptor)
 @Controller('stores')
 export class StoreController {
   constructor(private readonly storeService: StoreService) {}
@@ -34,6 +38,22 @@ export class StoreController {
     @Body() createStoreDto: CreateStoreDto,
   ): Promise<StoreEntity> {
     return this.storeService.createStore(req.user.sub, createStoreDto);
+  }
+
+  @Get()
+  @UseGuards(AuthGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get store (Admin only)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns store with work hours',
+    type: StoreEntity,
+  })
+  public async getStoreWithWorkHours(
+    @Request() req,
+  ): Promise<StoreEntity> {
+    return this.storeService.getStoreWithWorkHours(req.user.sub);
   }
 
   @Patch(':id')
@@ -77,6 +97,26 @@ export class StoreController {
       adminId: req.user.sub,
       storeId: id,
       workHours: setWorkHoursDto.workHours,
+    });
+  }
+
+  @Post(':id/publish')
+  @UseGuards(AuthGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Publish store (Admin only)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Store successfully published',
+    type: StoreEntity,
+  })
+  public async publishStore(
+    @Request() req,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<StoreEntity> {
+    return this.storeService.publishStore({
+      adminId: req.user.sub,
+      storeId: id,
     });
   }
 }

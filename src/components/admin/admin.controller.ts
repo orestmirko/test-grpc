@@ -36,7 +36,7 @@ export class AdminController {
   })
   @ApiHeader({
     name: 'x-super-admin-key',
-    description: 'Secret key for super admin access',
+    description: 'Secret key for super admin access (admin-invite-secret)',
     required: true,
   })
   public async invite(@Body() inviteDto: AdminInviteDto) {

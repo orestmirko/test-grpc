@@ -5,12 +5,14 @@ import {
   NotFoundException,
   UnauthorizedException,
   BadRequestException,
+  ClassSerializerInterceptor,
+  UseInterceptors,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Not } from 'typeorm';
 import { StoreEntity, AdminEntity, StoreWorkHoursEntity } from '@entities';
 import { CreateStoreDto } from '@dtos';
-import { ISetWorkHoursParams, IUpdateStoreParams } from '@interfaces';
+import { ISetWorkHoursParams, IUpdateStoreParams, IPublishStoreParams } from '@interfaces';
 
 @Injectable()
 export class StoreService {
@@ -126,6 +128,7 @@ export class StoreService {
     }
   }
 
+  @UseInterceptors(ClassSerializerInterceptor)
   public async setWorkHours({
     adminId,
     storeId,
@@ -174,11 +177,56 @@ export class StoreService {
             workHoursEntities,
           );
 
+          store.workHours.forEach(wh => {
+            delete wh.store;
+          });
+
           return store;
         },
       );
     } catch (error) {
       this.logger.error(`Failed to set work hours: ${error.message}`);
+      throw error;
+    }
+  }
+
+  public async publishStore({
+    adminId,
+    storeId,
+  }: IPublishStoreParams): Promise<StoreEntity> {
+    try {
+      const admin = await this.adminRepository.findOne({
+        where: { id: adminId },
+        relations: ['store'],
+      });
+
+      if (!admin) {
+        throw new NotFoundException('Admin not found');
+      }
+
+      if (!admin.store || admin.store.id !== storeId) {
+        throw new UnauthorizedException('Admin can only publish their own store');
+      }
+
+      const store = await this.storeRepository.findOne({
+        where: { id: storeId },
+      });
+
+      if (!store) {
+        throw new NotFoundException('Store not found');
+      }
+
+      if (store.isActive) {
+        throw new ConflictException('Store is already published');
+      }
+
+      store.isActive = true;
+      const updatedStore = await this.storeRepository.save(store);
+
+      this.logger.log(`Store published with ID: ${storeId} by admin: ${adminId}`);
+      return updatedStore;
+    } catch (error) {
+      this.logger.error(`Failed to publish store: ${error.message}`);
       throw error;
     }
   }
@@ -220,6 +268,34 @@ export class StoreService {
           );
         }
       }
+    }
+  }
+
+  @UseInterceptors(ClassSerializerInterceptor)
+  public async getStoreWithWorkHours(adminId: number): Promise<StoreEntity> {
+    try {
+      const admin = await this.adminRepository.findOne({
+        where: { id: adminId },
+        relations: ['store'],
+      });
+
+      if (!admin) {
+        throw new NotFoundException('Admin not found');
+      }
+
+      if (!admin.store) {
+        throw new NotFoundException('Store not found');
+      }
+
+      const store = await this.storeRepository.findOne({
+        where: { id: admin.store.id },
+        relations: ['workHours'],
+      });
+
+      return store;
+    } catch (error) {
+      this.logger.error(`Failed to get store with work hours: ${error.message}`);
+      throw error;
     }
   }
 }

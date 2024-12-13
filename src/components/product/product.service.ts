@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ProductEntity, AdminEntity, StoreEntity } from '@entities';
+import { ProductEntity, AdminEntity, StoreEntity, ProductCompositionEntity } from '@entities';
 import { CreateProductDto } from '@dtos';
 import { ProductType, PackagingType } from '@enums';
 
@@ -181,6 +181,78 @@ export class ProductService {
       if (!dto.packagingColor) {
         throw new BadRequestException(`Packaging color is required for ${type}`);
       }
+    }
+  }
+
+  public async addFlowersToProduct(
+    adminId: number,
+    parentProductId: number,
+    flowers: { flowerId: number; quantity: number }[],
+  ): Promise<ProductEntity> {
+    try {
+      const admin = await this.adminRepository.findOne({
+        where: { id: adminId },
+        relations: ['store'],
+      });
+
+      if (!admin) {
+        throw new NotFoundException('Admin not found');
+      }
+
+      const parentProduct = await this.productRepository.findOne({
+        where: { id: parentProductId, store: { id: admin.store.id } },
+        relations: ['compositions', 'store'],
+      });
+
+      if (!parentProduct) {
+        throw new NotFoundException('Parent product not found');
+      }
+
+      if (![ProductType.BOUQUET, ProductType.BASKET, ProductType.PACKAGE].includes(parentProduct.productType)) {
+        throw new BadRequestException('Can only add flowers to bouquet, basket or package');
+      }
+
+      const childProducts = await Promise.all(
+        flowers.map(async ({ flowerId }) => {
+          const product = await this.productRepository.findOne({
+            where: { 
+              id: flowerId, 
+              store: { id: admin.store.id },
+              productType: ProductType.FLOWER 
+            },
+          });
+
+          if (!product) {
+            throw new NotFoundException(`Flower with ID ${flowerId} not found`);
+          }
+
+          return product;
+        }),
+      );
+
+      const compositions = flowers.map((flower, index) => {
+        const composition = new ProductCompositionEntity();
+        composition.parentProduct = parentProduct;
+        composition.childProduct = childProducts[index];
+        composition.quantity = flower.quantity;
+        return composition;
+      });
+
+      if (!parentProduct.compositions) {
+        parentProduct.compositions = [];
+      }
+      
+      parentProduct.compositions.push(...compositions);
+      await this.productRepository.manager.save(compositions);
+
+      this.logger.log(
+        `Added ${flowers.length} flowers to product (ID: ${parentProductId})`,
+      );
+
+      return parentProduct;
+    } catch (error) {
+      this.logger.error(`Failed to add flowers to product: ${error.message}`);
+      throw error;
     }
   }
 }

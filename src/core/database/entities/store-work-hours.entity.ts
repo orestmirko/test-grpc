@@ -1,8 +1,10 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, BaseEntity, JoinColumn } from 'typeorm';
 import { StoreEntity } from './store.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity('store_work_hours')
 export class StoreWorkHoursEntity extends BaseEntity {
+  @Exclude()
   @PrimaryGeneratedColumn('uuid')
   public id: string;
 
@@ -17,17 +19,18 @@ export class StoreWorkHoursEntity extends BaseEntity {
   @Column({
     name: 'open_time',
     type: 'time',
-    nullable: false,
+    nullable: true,
   })
   public openTime: string;
 
   @Column({
     name: 'close_time',
     type: 'time',
-    nullable: false,
+    nullable: true,
   })
   public closeTime: string;
 
+  @Exclude()
   @ManyToOne(() => StoreEntity, (store) => store.workHours, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'store_id' })
   public store: StoreEntity;
