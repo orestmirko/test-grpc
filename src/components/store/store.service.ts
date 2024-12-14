@@ -3,7 +3,6 @@ import {
   Logger,
   ConflictException,
   NotFoundException,
-  UnauthorizedException,
   BadRequestException,
   ClassSerializerInterceptor,
   UseInterceptors,
@@ -11,8 +10,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Not } from 'typeorm';
 import { StoreEntity, AdminEntity, StoreWorkHoursEntity } from '@entities';
-import { CreateStoreDto } from '@dtos';
-import { ISetWorkHoursParams, IUpdateStoreParams, IPublishStoreParams } from '@interfaces';
+import { CreateStoreDto, UpdateStoreDto } from '@dtos';
 
 @Injectable()
 export class StoreService {
@@ -76,11 +74,7 @@ export class StoreService {
     }
   }
 
-  public async updateStore({
-    adminId,
-    storeId,
-    updateData,
-  }: IUpdateStoreParams): Promise<StoreEntity> {
+  public async updateStore(adminId: number, updateData: UpdateStoreDto): Promise<StoreEntity> {
     try {
       const admin = await this.adminRepository.findOne({
         where: { id: adminId },
@@ -91,13 +85,13 @@ export class StoreService {
         throw new NotFoundException('Admin not found');
       }
 
-      if (!admin.store || admin.store.id !== storeId) {
-        throw new UnauthorizedException('Admin can only update their own store');
+      if (!admin.store) {
+        throw new NotFoundException('Store not found');
       }
 
       if (updateData.phone) {
         const existingStoreByPhone = await this.storeRepository.findOne({
-          where: { phone: updateData.phone, id: Not(storeId) },
+          where: { phone: updateData.phone, id: Not(admin.store.id) },
         });
 
         if (existingStoreByPhone) {
@@ -107,7 +101,7 @@ export class StoreService {
 
       if (updateData.email) {
         const existingStoreByEmail = await this.storeRepository.findOne({
-          where: { email: updateData.email, id: Not(storeId) },
+          where: { email: updateData.email, id: Not(admin.store.id) },
         });
 
         if (existingStoreByEmail) {
@@ -115,12 +109,11 @@ export class StoreService {
         }
       }
 
-      await this.storeRepository.update(storeId, updateData);
+      await this.storeRepository.update(admin.store.id, updateData);
       const updatedStore = await this.storeRepository.findOne({
-        where: { id: storeId },
+        where: { id: admin.store.id },
       });
 
-      this.logger.log(`Store updated with ID: ${storeId} by admin: ${adminId}`);
       return updatedStore;
     } catch (error) {
       this.logger.error(`Failed to update store: ${error.message}`);
@@ -129,11 +122,15 @@ export class StoreService {
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
-  public async setWorkHours({
-    adminId,
-    storeId,
-    workHours,
-  }: ISetWorkHoursParams): Promise<StoreEntity> {
+  public async setWorkHours(
+    adminId: number,
+    workHours: Array<{
+      dayOfWeek: number;
+      isWorkingDay: boolean;
+      openTime?: string;
+      closeTime?: string;
+    }>,
+  ): Promise<StoreEntity> {
     try {
       this.validateWorkHours(workHours);
 
@@ -146,18 +143,14 @@ export class StoreService {
         throw new NotFoundException('Admin not found');
       }
 
-      if (!admin.store || admin.store.id !== storeId) {
-        throw new UnauthorizedException('Admin can only update their own store');
+      if (!admin.store) {
+        throw new NotFoundException('Store not found');
       }
 
       const store = await this.storeRepository.findOne({
-        where: { id: storeId },
+        where: { id: admin.store.id },
         relations: ['workHours'],
       });
-
-      if (!store) {
-        throw new NotFoundException('Store not found');
-      }
 
       return await this.workHoursRepository.manager.transaction(
         async (transactionalEntityManager) => {
@@ -190,7 +183,7 @@ export class StoreService {
     }
   }
 
-  public async publishStore({ adminId, storeId }: IPublishStoreParams): Promise<StoreEntity> {
+  public async publishStore(adminId: number): Promise<StoreEntity> {
     try {
       const admin = await this.adminRepository.findOne({
         where: { id: adminId },
@@ -201,17 +194,13 @@ export class StoreService {
         throw new NotFoundException('Admin not found');
       }
 
-      if (!admin.store || admin.store.id !== storeId) {
-        throw new UnauthorizedException('Admin can only publish their own store');
+      if (!admin.store) {
+        throw new NotFoundException('Store not found');
       }
 
       const store = await this.storeRepository.findOne({
-        where: { id: storeId },
+        where: { id: admin.store.id },
       });
-
-      if (!store) {
-        throw new NotFoundException('Store not found');
-      }
 
       if (store.isActive) {
         throw new ConflictException('Store is already published');
@@ -220,7 +209,7 @@ export class StoreService {
       store.isActive = true;
       const updatedStore = await this.storeRepository.save(store);
 
-      this.logger.log(`Store published with ID: ${storeId} by admin: ${adminId}`);
+      this.logger.log(`Store published with ID: ${store.id} by admin: ${adminId}`);
       return updatedStore;
     } catch (error) {
       this.logger.error(`Failed to publish store: ${error.message}`);

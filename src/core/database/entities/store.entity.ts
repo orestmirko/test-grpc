@@ -11,6 +11,7 @@ export class StoreEntity extends BaseEntity {
     type: 'varchar',
     length: 100,
     nullable: false,
+    unique: true,
   })
   @Index()
   public name: string;

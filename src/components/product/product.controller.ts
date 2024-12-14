@@ -1,6 +1,19 @@
-import { Body, Controller, Post, Request, UseGuards, Param, ParseIntPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Request,
+  UseGuards,
+  Param,
+  ParseIntPipe,
+  UseInterceptors,
+  ClassSerializerInterceptor,
+  Patch,
+  Delete,
+  Get,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { CreateProductDto, AddFlowerToProductDto } from '@dtos';
+import { CreateProductDto, AddFlowerToProductDto, UpdateProductDto } from '@dtos';
 import { AuthGuard, Roles } from '@guards';
 import { UserRole } from '@enums';
 import { ProductEntity } from '@entities';
@@ -8,6 +21,7 @@ import { ProductService } from './product.service';
 
 @ApiTags('Products')
 @Controller('products')
+@UseInterceptors(ClassSerializerInterceptor)
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
@@ -44,5 +58,47 @@ export class ProductController {
     @Body() addFlowersDto: AddFlowerToProductDto,
   ): Promise<ProductEntity> {
     return this.productService.addFlowersToProduct(req.user.sub, id, addFlowersDto.flowers);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get product by ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns product details',
+    type: ProductEntity,
+  })
+  public async getProduct(@Param('id', ParseIntPipe) id: number): Promise<ProductEntity> {
+    return this.productService.getProduct(id);
+  }
+
+  @Patch(':id')
+  @UseGuards(AuthGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update product (Admin only)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Product successfully updated',
+    type: ProductEntity,
+  })
+  public async updateProduct(
+    @Request() req,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateProductDto: UpdateProductDto,
+  ): Promise<ProductEntity> {
+    return this.productService.updateProduct(req.user.sub, id, updateProductDto);
+  }
+
+  @Delete(':id')
+  @UseGuards(AuthGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete product (Admin only)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Product successfully deleted',
+  })
+  public async deleteProduct(@Request() req, @Param('id', ParseIntPipe) id: number): Promise<void> {
+    return this.productService.deleteProduct(req.user.sub, id);
   }
 }

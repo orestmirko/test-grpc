@@ -41,4 +41,8 @@ export class RedisService {
     const result = await this.redis.exists(key);
     return result === 1;
   }
+
+  async keys(pattern: string): Promise<string[]> {
+    return this.redis.keys(pattern);
+  }
 }

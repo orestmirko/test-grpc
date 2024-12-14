@@ -54,7 +54,7 @@ export class StoreController {
     return this.storeService.getStoreWithWorkHours(req.user.sub);
   }
 
-  @Patch(':id')
+  @Patch()
   @UseGuards(AuthGuard)
   @Roles(UserRole.ADMIN)
   @ApiBearerAuth()
@@ -66,17 +66,12 @@ export class StoreController {
   })
   public async updateStore(
     @Request() req,
-    @Param('id', ParseIntPipe) id: number,
     @Body() updateStoreDto: UpdateStoreDto,
   ): Promise<StoreEntity> {
-    return this.storeService.updateStore({
-      adminId: req.user.sub,
-      storeId: id,
-      updateData: updateStoreDto,
-    });
+    return this.storeService.updateStore(req.user.sub, updateStoreDto);
   }
 
-  @Post(':id/work-hours')
+  @Post('work-hours')
   @UseGuards(AuthGuard)
   @Roles(UserRole.ADMIN)
   @ApiBearerAuth()
@@ -88,17 +83,12 @@ export class StoreController {
   })
   public async setWorkHours(
     @Request() req,
-    @Param('id', ParseIntPipe) id: number,
     @Body() setWorkHoursDto: SetWorkHoursDto,
   ): Promise<StoreEntity> {
-    return this.storeService.setWorkHours({
-      adminId: req.user.sub,
-      storeId: id,
-      workHours: setWorkHoursDto.workHours,
-    });
+    return this.storeService.setWorkHours(req.user.sub, setWorkHoursDto.workHours);
   }
 
-  @Post(':id/publish')
+  @Post('publish')
   @UseGuards(AuthGuard)
   @Roles(UserRole.ADMIN)
   @ApiBearerAuth()
@@ -108,13 +98,7 @@ export class StoreController {
     description: 'Store successfully published',
     type: StoreEntity,
   })
-  public async publishStore(
-    @Request() req,
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<StoreEntity> {
-    return this.storeService.publishStore({
-      adminId: req.user.sub,
-      storeId: id,
-    });
+  public async publishStore(@Request() req): Promise<StoreEntity> {
+    return this.storeService.publishStore(req.user.sub);
   }
 }

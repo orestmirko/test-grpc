@@ -1,12 +1,13 @@
 import { Entity, ManyToOne, Column, PrimaryGeneratedColumn, JoinColumn } from 'typeorm';
 import { ProductEntity } from './product.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity('product_compositions')
 export class ProductCompositionEntity {
   @PrimaryGeneratedColumn('uuid')
   public id: string;
 
-  // "букет Літній набір"
+  @Exclude()
   @ManyToOne(() => ProductEntity, (product) => product.compositions, {
     nullable: false,
     onDelete: 'CASCADE',
@@ -14,8 +15,6 @@ export class ProductCompositionEntity {
   @JoinColumn({ name: 'parent_product_id' })
   public parentProduct: ProductEntity;
 
-  // троянда (FLOWER) + quantity = 10
-  // тюльпан (FLOWER) + quantity = 5
   @ManyToOne(() => ProductEntity, (product) => product.includedIn, {
     nullable: false,
     onDelete: 'CASCADE',

@@ -3,6 +3,7 @@ import { BaseEntity } from './base.entity';
 import { StoreEntity } from './store.entity';
 import { Currency, Season, ProductType, PackagingType } from '../../../enums';
 import { ProductCompositionEntity } from './product-composition.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity('products')
 export class ProductEntity extends BaseEntity {
@@ -192,6 +193,7 @@ export class ProductEntity extends BaseEntity {
   @OneToMany(() => ProductCompositionEntity, (pc) => pc.parentProduct)
   public compositions: ProductCompositionEntity[];
 
+  @Exclude()
   @OneToMany(() => ProductCompositionEntity, (pc) => pc.childProduct)
   public includedIn: ProductCompositionEntity[];
 }
