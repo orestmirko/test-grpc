@@ -7,6 +7,7 @@ import { CreateMerchantDto, CreatePaymentDto, UpdateStatusDto } from '@dtos';
 import { IPaymentsService } from './service.interface';
 import { AggregatorCommissionsRepository, MerchantRepository, PaymentRepository } from '@repositories';
 import { DataSource } from 'typeorm';
+import { Decimal } from 'decimal.js';
 
 @Injectable()
 export class PaymentsService implements IPaymentsService {
@@ -47,24 +48,23 @@ export class PaymentsService implements IPaymentsService {
 
     const { fixedFee, percentFee, holdPercent } = globalCommissions;
 
-    const totalFee =
-      Number(fixedFee) +
-      (Number(percentFee) / 100) * paymentData.amount +
-      (Number(merchant.commissionPercent) / 100) * paymentData.amount;
+    const totalFee = new Decimal(fixedFee)
+      .plus(new Decimal(percentFee).dividedBy(100).times(paymentData.amount))
+      .plus(new Decimal(merchant.commissionPercent).dividedBy(100).times(paymentData.amount));
 
-    const netAmount = paymentData.amount - totalFee;
-    if (netAmount < 0) {
+    const netAmount = new Decimal(paymentData.amount).minus(totalFee);
+    if (netAmount.isNegative()) {
       throw new BadRequestException(`Payment amount is too small to cover fees`);
     }
 
-    const holdAmount = (Number(holdPercent) / 100) * paymentData.amount;
+    const holdAmount = new Decimal(holdPercent).dividedBy(100).times(paymentData.amount);
 
     return this.paymentRepository.create({
       merchant,
       amount: paymentData.amount,
       status: PaymentStatus.ACCEPTED,
-      netAmount,
-      holdAmount,
+      netAmount: netAmount.toNumber(),
+      holdAmount: holdAmount.toNumber(),
     });
   }
 
