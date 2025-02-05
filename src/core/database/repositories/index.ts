@@ -1,2 +1,3 @@
-export * from './user.repository';
-export * from './product.repository';
+export * from './aggregator-commissions.repository';
+export * from './merchant.repository';
+export * from './payment.repository';

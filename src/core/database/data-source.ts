@@ -1,7 +1,6 @@
 import { DataSource } from 'typeorm';
 import { config } from '../../configs/env.config';
 import { lowercaseKeys } from '../../utils/lowercase-keys.util';
-import { join } from 'path';
 
 const { MIGRATIONS_RUN, MIGRATIONS_DIR, ...rest } = config.DATABASE;
 

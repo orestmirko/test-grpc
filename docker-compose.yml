@@ -5,9 +5,9 @@ services:
     ports:
       - '5777:5432'
     environment:
-      POSTGRES_USER: garden
+      POSTGRES_USER: test
       POSTGRES_PASSWORD: 123postgres
-      POSTGRES_DB: garden-dev
+      POSTGRES_DB: test-dev
     volumes:
       - db_data:/var/lib/postgresql/data
     networks:

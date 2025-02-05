@@ -3,11 +3,11 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 export const SwaggerInit = (app: NestFastifyApplication) => {
   const config = new DocumentBuilder()
-    .setTitle('Garden API')
-    .setDescription('Garden API.')
+    .setTitle('Test Task API')
+    .setDescription('Test Task API.')
     .setVersion('1.0')
     .addBearerAuth()
-    .addTag('Garden API')
+    .addTag('Test Task API')
     .addServer('http://localhost:8000', 'Local server')
     .build();
 
