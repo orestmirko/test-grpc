@@ -1,20 +1,25 @@
+version: '3'
+
 services:
-  db:
-    image: postgres:15
-    container_name: postgres_container
+  producer:
+    build:
+      context: ./producer-service
+      dockerfile: Dockerfile
     ports:
-      - '5777:5432'
-    environment:
-      POSTGRES_USER: test
-      POSTGRES_PASSWORD: 123postgres
-      POSTGRES_DB: test-dev
-    volumes:
-      - db_data:/var/lib/postgresql/data
+      - "5001:5001"
+    networks:
+      - my_network
+
+  consumer:
+    build:
+      context: ./consumer-service
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - producer
     networks:
       - my_network
 
 networks:
   my_network:
-
-volumes:
-  db_data:
